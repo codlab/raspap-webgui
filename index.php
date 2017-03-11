@@ -32,7 +32,6 @@ function stopAP() {
 function startAP() {
   exec("sudo /bin/cp /etc/network/interfaces_ap /etc/network/interfaces");
   exec("sudo /etc/init.d/networking restart");
-
   exec("sudo systemctl enable hostapd.service");
   exec("sudo systemctl start hostapd.service");
   exec("sudo systemctl enable dnsmasq.service");
@@ -40,6 +39,7 @@ function startAP() {
   exec("sudo systemctl stop wpa_supplicant.service");
   exec("sudo systemctl stop wpa_supplicant.service");
   exec("sudo systemctl disable wpa_supplicant.service");
+  exec("sudo /etc/init.d/networking restart");
 }
 
 
