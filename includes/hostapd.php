@@ -224,16 +224,17 @@ function DisplayHostAPDConfig(){
               fwrite($tmp_file, 'wpa_key_mgmt=WPA-PSK'.PHP_EOL);
 
               fwrite($tmp_file, 'ssid='.$_POST['ssid'].PHP_EOL);
-              #fwrite($tmp_file, 'channel='.$_POST['channel'].PHP_EOL);
-              #fwrite($tmp_file, 'hw_mode='.$_POST['hw_mode'].PHP_EOL);
+              fwrite($tmp_file, 'channel=1'.PHP_EOL); //$_POST['channel']
+              fwrite($tmp_file, 'hw_mode=g'.PHP_EOL); //$_POST['hw_mode']
               fwrite($tmp_file, 'wpa_passphrase='.$_POST['wpa_passphrase'].PHP_EOL);
               fwrite($tmp_file, 'interface='.$_POST['interface'].PHP_EOL);
               fwrite($tmp_file, 'wpa='.$_POST['wpa'].PHP_EOL);
               fwrite($tmp_file, 'wpa_pairwise='.$_POST['wpa_pairwise'].PHP_EOL);
               fwrite($tmp_file, 'country_code='.$_POST['country_code'].PHP_EOL);
-              fwrite($tmp_file, 'ieee80211n=1');
-              fwrite($tmp_file, 'wmm_enabled=1');
-              fwrite($tmp_file, 'ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]');
+              fwrite($tmp_file, 'ieee80211n=1'.PHP_EOL);
+              fwrite($tmp_file, 'wmm_enabled=1'.PHP_EOL);
+              fwrite($tmp_file, 'ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]'.PHP_EOL);
+              fwrite($tmp_file, 'rsn_pairwise=CCMP'.PHP_EOL);
               fclose($tmp_file);
 
               system( "sudo cp /tmp/hostapddata " . RASPI_HOSTAPD_CONFIG, $return );
