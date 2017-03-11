@@ -35,6 +35,7 @@ function DisplayDHCPConfig() {
       if ($dnsmasq_state) {
         $status->addMessage('dnsmasq already running', 'info');
       } else {
+        exec("sudo /bin/systemctl enable dnsmasq.service");
         exec('sudo /etc/init.d/dnsmasq start', $dnsmasq, $return);
         if ($return == 0) {
           $status->addMessage('Successfully started dnsmasq', 'success');
@@ -49,6 +50,8 @@ function DisplayDHCPConfig() {
   } elseif( isset($_POST['stopdhcpd'] ) ) {
     if (CSRFValidate()) {
       if ($dnsmasq_state) {
+        exec("sudo /bin/systemctl stop dnsmasq.service");
+        exec("sudo /bin/systemctl disable dnsmasq.service");
         exec('sudo /etc/init.d/dnsmasq stop', $dnsmasq, $return);
         if ($return == 0) {
           $status->addMessage('Successfully stopped dnsmasq', 'success');
@@ -116,7 +119,7 @@ function DisplayDHCPConfig() {
       <div class="form-group col-md-4">
         <label for="code">Interface</label>
         <select class="form-control" name="interface">
-        <?php 
+        <?php
         exec("ip -o link show | awk -F': ' '{print $2}'", $interfaces);
 
         foreach( $interfaces as $int ) {
@@ -151,7 +154,7 @@ function DisplayDHCPConfig() {
       </div>
       <div class="col-xs-2 col-sm-2">
         <label for="code">Interval</label>
-        <select name="RangeLeaseTimeUnits" class="form-control" ><option value="m" <?php echo $mselected; ?>>Minutes</option><option value="h" <?php echo $hselected; ?>>Hours</option><option value="d" <?php echo $dselected; ?>>Days</option><option value="infinite">Infinite</option></select> 
+        <select name="RangeLeaseTimeUnits" class="form-control" ><option value="m" <?php echo $mselected; ?>>Minutes</option><option value="h" <?php echo $hselected; ?>>Hours</option><option value="d" <?php echo $dselected; ?>>Days</option><option value="infinite">Infinite</option></select>
       </div>
     </div>
 
@@ -217,4 +220,3 @@ function DisplayDHCPConfig() {
 }
 
 ?>
-
