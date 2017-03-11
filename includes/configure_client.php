@@ -89,6 +89,9 @@ function DisplayWPAConfig(){
       }
 
       if ($ok) {
+        //stopAP to prevent issue with client configuration
+        stopAP();
+
         system( 'sudo cp /tmp/wifidata ' . RASPI_WPA_SUPPLICANT_CONFIG, $returnval );
         if( $returnval == 0 ) {
           exec('sudo wpa_cli reconfigure', $reconfigure_out, $reconfigure_return );
@@ -142,7 +145,7 @@ function DisplayWPAConfig(){
 
   <div class="row">
     <div class="col-lg-12">
-      <div class="panel panel-primary">           
+      <div class="panel panel-primary">
         <div class="panel-heading"><i class="fa fa-signal fa-fw"></i> Configure client</div>
         <!-- /.panel-heading -->
         <div class="panel-body">

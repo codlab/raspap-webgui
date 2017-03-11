@@ -1,23 +1,5 @@
 <?php
 
-function stopAP() {
-  exec("sudo systemctl stop hostapd.service");
-  exec("sudo systemctl disable hostapd.service");
-  exec("sudo systemctl stop dnsmasq.service");
-  exec("sudo systemctl disable dnsmasq.service");
-  exec("sudo systemctl enable wpa_supplicant.service");
-  exec("sudo systemctl start wpa_supplicant.service");
-}
-
-function startAP() {
-  exec("sudo systemctl enable hostapd.service");
-  exec("sudo systemctl start hostapd.service");
-  exec("sudo systemctl enable dnsmasq.service");
-  exec("sudo systemctl start dnsmasq.service");
-  exec("sudo systemctl stop wpa_supplicant.service");
-  exec("sudo systemctl disable wpa_supplicant.service");
-}
-
 include_once( 'includes/status_messages.php' );
 
 /**
@@ -118,18 +100,6 @@ function DisplayHostAPDConfig(){
                         <input type="text" class="form-control" name="ssid" value="<?php echo $arrConfig['ssid']; ?>" />
                       </div>
                     </div>
-                    <div class="row">
-                      <div class="form-group col-md-4">
-                        <label for="code">Wireless Mode</label>
-                        <?php SelectorOptions('hw_mode', $arrChannel, $arrConfig['hw_mode']); ?>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="form-group col-md-4">
-                        <label for="code">Channel</label>
-                        <?php SelectorOptions('channel', range(1, 14), intval($arrConfig['channel'])) ?>
-                      </div>
-                    </div>
                   </div>
                   <div class="tab-pane fade" id="security">
                     <h4>Security settings</h4>
@@ -181,12 +151,8 @@ function DisplayHostAPDConfig(){
         function SaveHostAPDConfig($wpa_array, $enc_types, $modes, $interfaces, $status) {
           // It should not be possible to send bad data for these fields so clearly
           // someone is up to something if they fail. Fail silently.
-          if (!(array_key_exists($_POST['wpa'], $wpa_array) && array_key_exists($_POST['wpa_pairwise'], $enc_types) && in_array($_POST['hw_mode'], $modes))) {
-            error_log("Attempting to set hostapd config with wpa='".$_POST['wpa']."', wpa_pairwise='".$_POST['wpa_pairwise']."' and hw_mode='".$_POST['hw_mode']."'");
-            return false;
-          }
-          if ((!filter_var($_POST['channel'], FILTER_VALIDATE_INT)) || intval($_POST['channel']) < 1 || intval($_POST['channel']) > 14) {
-            error_log("Attempting to set channel to '".$_POST['channel']."'");
+          if (!(array_key_exists($_POST['wpa'], $wpa_array) && array_key_exists($_POST['wpa_pairwise'], $enc_types))) {
+            error_log("Attempting to set hostapd config with wpa='".$_POST['wpa']."', wpa_pairwise='".$_POST['wpa_pairwise']);
             return false;
           }
 
@@ -216,25 +182,29 @@ function DisplayHostAPDConfig(){
           if ($good_input) {
             if ($tmp_file = fopen('/tmp/hostapddata', 'w')) {
               // Fixed values
+              fwrite($tmp_file, 'interface=wlan0'.PHP_EOL);
               fwrite($tmp_file, 'driver=nl80211'.PHP_EOL);
-              fwrite($tmp_file, 'ctrl_interface='.RASPI_HOSTAPD_CTRL_INTERFACE.PHP_EOL);
-              fwrite($tmp_file, 'ctrl_interface_group=0'.PHP_EOL);
-              fwrite($tmp_file, 'beacon_int=100'.PHP_EOL);
-              fwrite($tmp_file, 'auth_algs=1'.PHP_EOL);
-              fwrite($tmp_file, 'wpa_key_mgmt=WPA-PSK'.PHP_EOL);
-
               fwrite($tmp_file, 'ssid='.$_POST['ssid'].PHP_EOL);
-              fwrite($tmp_file, 'channel=1'.PHP_EOL); //$_POST['channel']
-              fwrite($tmp_file, 'hw_mode=g'.PHP_EOL); //$_POST['hw_mode']
+              fwrite($tmp_file, 'hw_mode=g'.PHP_EOL);
+              fwrite($tmp_file, 'channel=6'.PHP_EOL);
+              fwrite($tmp_file, 'auth_algs=1'.PHP_EOL);
+              fwrite($tmp_file, 'beacon_int=100'.PHP_EOL);
+              fwrite($tmp_file, 'dtim_period=2'.PHP_EOL);
+              fwrite($tmp_file, 'max_num_sta=255'.PHP_EOL);
+              fwrite($tmp_file, 'rts_threshold=2347'.PHP_EOL);
+              fwrite($tmp_file, 'fragm_threshold=2346'.PHP_EOL);
               fwrite($tmp_file, 'wpa_passphrase='.$_POST['wpa_passphrase'].PHP_EOL);
-              fwrite($tmp_file, 'interface='.$_POST['interface'].PHP_EOL);
               fwrite($tmp_file, 'wpa='.$_POST['wpa'].PHP_EOL);
               fwrite($tmp_file, 'wpa_pairwise='.$_POST['wpa_pairwise'].PHP_EOL);
-              fwrite($tmp_file, 'country_code='.$_POST['country_code'].PHP_EOL);
-              fwrite($tmp_file, 'ieee80211n=1'.PHP_EOL);
-              fwrite($tmp_file, 'wmm_enabled=1'.PHP_EOL);
-              fwrite($tmp_file, 'ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]'.PHP_EOL);
+              fwrite($tmp_file, 'auth_algs=1'.PHP_EOL);
               fwrite($tmp_file, 'rsn_pairwise=CCMP'.PHP_EOL);
+              fwrite($tmp_file, 'ieee80211n=1'.PHP_EOL);
+              fwrite($tmp_file, 'ctrl_interface_group=0'.PHP_EOL);
+              fwrite($tmp_file, 'beacon_int=100'.PHP_EOL);
+              fwrite($tmp_file, 'wmm_enabled=1'.PHP_EOL);
+              fwrite($tmp_file, 'macaddr_acl=0'.PHP_EOL);
+              fwrite($tmp_file, 'wpa_key_mgmt=WPA-PSK'.PHP_EOL);
+
               fclose($tmp_file);
 
               system( "sudo cp /tmp/hostapddata " . RASPI_HOSTAPD_CONFIG, $return );
