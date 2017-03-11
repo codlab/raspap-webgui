@@ -88,6 +88,9 @@ www-data ALL=(ALL) NOPASSWD:/bin/systemctl start dnsmasq.service
 www-data ALL=(ALL) NOPASSWD:/bin/systemctl enable dnsmasq.service
 www-data ALL=(ALL) NOPASSWD:/bin/systemctl disable wpa_supplicant.service
 www-data ALL=(ALL) NOPASSWD:/bin/systemctl stop wpa_supplicant.service
+www-data ALL=(ALL) NOPASSWD:/bin/cp /etc/network/interfaces_ap /etc/network/interfaces
+www-data ALL=(ALL) NOPASSWD:/bin/cp /etc/network/interfaces_std /etc/network/interfaces
+www-data ALL=(ALL) NOPASSWD:/etc/init.d/networking restart
 ```
 
 Once those modifications are done, git clone the files to `/var/www/html`.
