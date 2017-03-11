@@ -30,7 +30,7 @@ function stopAP() {
 }
 
 function startAP() {
-  exec("sudo /bin/cp /etc/network/interfaces_a /etc/network/interfaces");
+  exec("sudo /bin/cp /etc/network/interfaces_ap /etc/network/interfaces");
   exec("sudo /etc/init.d/networking restart");
 
   exec("sudo systemctl enable hostapd.service");
