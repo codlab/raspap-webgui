@@ -29,22 +29,6 @@ To configure your RPi as a WiFi router, either of these resources will start you
 
 After you complete the intial setup, you'll be able to administer these services using the web UI.
 
-## Quick installer
-Install RaspAP from your RaspberryPi's shell prompt:
-```sh
-$ wget -q https://git.io/voEUQ -O /tmp/raspap && bash /tmp/raspap
-```
-The installer will complete the steps in the manual installation (below) for you.
-
-After the reboot at the end of the installation the wireless network will be
-configured as an access point as follows:
-* IP address: 10.3.141.1
-  * Username: admin
-  * Password: secret
-* DHCP range: 10.3.141.50 to 10.3.141.255
-* SSID: `raspi-webgui`
-* Password: ChangeMe
-
 ## Manual installation
 Start off by installing lighttpd, php5, hostapd and dnsmasq.
 ```sh
@@ -93,12 +77,87 @@ www-data ALL=(ALL) NOPASSWD:/bin/cp /etc/network/interfaces_std /etc/network/int
 www-data ALL=(ALL) NOPASSWD:/etc/init.d/networking restart
 ```
 
+then disable hostapd until you explicitly use it via the web app
+```sh
+sudo systemctl stop hostapd
+sudo systemctl disable hostapd
+```
+and edit the init.id's hostapd to use the configuration file
+```
+sudo nano /etc/init.d/hostapd
+```
+and set
+```
+DAEMON_CONF=
+#to
+DAEMON_CONF=/etc/hostapd/hostapd.conf
+```
+
+same thing with
+```
+sudo nano /etc/default/hostapd
+```
+set
+```
+DAEMON_CONF=
+#to
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+```
+
+```sh
+sudo nano /etc/network/interfaces_std
+```
+
+and put in there :
+```
+auto lo
+iface lo inet loopback
+
+iface eth0 inet manual
+
+allow-hotplug wlan0
+iface wlan0 inet manual
+wireless-power off
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+allow-hotplug wlan1
+iface wlan1 inet manual
+wireless-power off
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+```
+
+Then for the second file
+
+```sh
+sudo nano /etc/network/interfaces_ap
+```
+
+and put in it :
+
+```
+auto lo
+
+iface lo inet loopback
+iface eth0 inet dhcp
+
+allow-hotplug wlan0
+iface wlan0 inet static
+wireless-power off
+ address 192.168.1.200
+ netmask 255.255.255.0
+ network 192.168.1.0
+
+
+iface default inet dhcp
+```
+
 Once those modifications are done, git clone the files to `/var/www/html`.
 **Note,** for older versions of Raspbian (before Jessie, May 2016) use
 `/var/www` instead.
+
 ```sh
 sudo rm -rf /var/www/html
-sudo git clone https://github.com/billz/raspap-webgui /var/www/html
+sudo git clone https://github.com/codlab/raspap-webgui /var/www/html
 ```
 Set the files ownership to `www-data` user.
 ```sh
